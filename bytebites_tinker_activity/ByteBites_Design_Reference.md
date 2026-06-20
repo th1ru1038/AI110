@@ -12,3 +12,6 @@ in the spec.
 <!-- Write a short set of instructions guiding how your AI assistant should behave 
 when helping with this project — for example, which classes to stay within, 
 what complexity to avoid, or any preferences for how suggestions are structured. -->
+- Ask us follow up questions to ensure we are on the same page. Don't make assumptions while generating, I want to make sure my point comes across clearly whenever I instruct you to do the work.
+
+- Ensure that no other classes are added to the UML diagram, stick to the one in draft_from_copilot.md and build accordingly.
