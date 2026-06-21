@@ -1,0 +1,29 @@
+Issues:
+
+- The energy sliders (for hype_min_energy) don't correspond to the energy level of the song
+
+
+Hype:
+- Energy Slider (hype_min_energy)
+- favorite_genre matches "hype"
+- "hype" keywords
+
+Chill: 
+- less than or equal to chill_max_energy
+- "chill" keywords in the genre
+
+Mixed:
+- doesn't meet hype or chill
+
+
+that means in the algo: favorite_genre > keyword > than the energy slider
+
+after messing around with teh favorite genre, the mixed playlist disappeared
+
+Search:
+also, there's a bug where the inputted songs are being shown in the results after  typing one entire song
+- it ie case-senstive, and i need to type the entire song out. 
+
+Playlist Statistics:
+-ask ai what the code is for total sogna and avg energy.
+- issue in hype ratio - hyp / total.
