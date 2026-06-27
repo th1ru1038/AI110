@@ -8,8 +8,16 @@ Answer each question in 3 to 5 sentences. Be specific and honest about what actu
 - List at least two concrete bugs you noticed at the start  
   (for example: "the hints were backwards").
 
-  - Sometimes, the number of attempts went to negatives.
-- Sometimes, the new gam functionality would restarrt, but cannot submit guess.
+  - Sometimes, the number of attempts went to negatives. I expected the attempts to be 0 when it's over, and restart when we click on New Game button.
+
+  - Any number chosen below the actual number, tells us that we should choose an even lower number, whereas it should be a higher number
+
+  - Any number chose above the actual number, tells us that we should choose an even higher number, whereas it should be a lower number
+
+  - When you first open the page, the number of attempts left begin with 7, where it mentions the user has attempted once already, whereas that isn't the case and nothing has been attempted. It is only when we click on "new game" button, the number of attempts restarts to 8, with the score remaining unchanged, and the history no being cleared. Also, if the number of attempts ran out, then it doesn't allow the user to submit a number regardless, so the number of attempts never reduces post that.
+  
+  - When clicking on submit guess, the first time it's not showing up on history despite the number of attempts reducing. It only shows up on th esceond time clicking on it, but th enumber of attempts reduced again.
+
 
 **Bug Reproduction Log**
 
@@ -21,8 +29,6 @@ Document at least 3 bugs you found. Add rows as needed.
 | Clicked New Game | Restart the attempts to 7| Restarted to 8| |
 | 43 | Go higher| Go lower | |
 
-- Sometimes, the number of attempts went to negatives.
-- Sometimes, the new gam functionality would restarrt, but cannot submit guess.
 
 ---
 
