@@ -31,7 +31,7 @@ It wrote the code, ran away, and now the game is unplayable.
   1. On even-numbered attempts, the secret number was converted to a string before being compared to the guess, causing a type mismatch that triggered an incorrect fallback comparison (string comparison instead of numeric).
   2. The hint *messages* were swapped — a "Too High" outcome displayed "Go HIGHER!" instead of "Go LOWER!", and vice versa, even though the underlying outcome label was correct.
   3. (Identified but not fixed, documented in reflection.md) The attempts counter initializes at 1 instead of 0, causing the display to start at 7 instead of 8. The "New Game" button also fails to reset score and guess history.
-  
+
 - [x] **Fixes applied:**
   1. Removed the even/odd string-conversion logic so the secret number always stays an integer, eliminating the broken fallback path entirely.
   2. Swapped the hint message strings so "Too High" correctly says "Go LOWER!" and "Too Low" correctly says "Go HIGHER!"
@@ -52,11 +52,28 @@ Describe your fixed game in numbered steps so a reader can follow along without 
 
 ## 🧪 Test Results
 
-```
-# Paste your pytest output here, e.g.:
-# pytest tests/
-# ========================= X passed in 0.XXs =========================
-```
+Note: This section is included for transparency even though Challenge 1 was not attempted. The 3 failing tests below are pre-existing starter-repo tests unrelated to the bugs I fixed — see explanation below the output.
+
+====================================================================== test session starts ======================================================================
+
+collected 5 items
+
+tests/test_game_logic.py::test_winning_guess FAILED                                                                                                       [ 20%]
+
+tests/test_game_logic.py::test_guess_too_high FAILED                                                                                                      [ 40%]
+
+tests/test_game_logic.py::test_guess_too_low FAILED                                                                                                       [ 60%]
+
+tests/test_game_logic.py::test_check_guess_integer_secret_even_attempt PASSED                                                                             [ 80%]
+
+tests/test_game_logic.py::test_hint_message_direction PASSED                                                                                              [100%]
+
+================================================================== 3 failed, 2 passed in 0.03s ==================================================================
+
+**Note on the 3 failing tests:** these are pre-existing tests from the starter repo, not related to the bugs I fixed. They assert `check_guess(...) == "Win"` (expecting a plain string), but `check_guess` has always returned a tuple `(outcome, message)` — even before my changes, confirmed by checking out the original code via `git stash`. This is a mismatch baked into the starter repo's test file, not something my fixes introduced or could resolve without changing the test assertions themselves, which I left untouched.
+
+**The 2 tests I added** (`test_check_guess_integer_secret_even_attempt` and `test_hint_message_direction`) both pass and directly verify the two bugs I fixed: the secret-stringification bug and the swapped hint-message bug.
+
 
 ## 🚀 Stretch Features
 
