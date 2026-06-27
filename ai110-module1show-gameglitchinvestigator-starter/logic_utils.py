@@ -12,6 +12,9 @@ def parse_guess(raw: str):
     raise NotImplementedError("Refactor this function from app.py into logic_utils.py")
 
 
+# FIX: Removed even/odd stringification of secret (Bug A) and corrected 
+# swapped hint messages (Bug B), refactored from app.py using AI chat sessions
+
 def check_guess(guess, secret):
     """
     Compare guess to secret and return (outcome, message).
