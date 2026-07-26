@@ -84,10 +84,29 @@ else:
         st.success(f"Added '{task_title}' to {selected_pet.name}.")
 
     st.markdown(f"### {selected_pet.name}'s tasks")
-    if selected_pet.tasks:
-        st.table([task.to_dict() for task in selected_pet.tasks])
-    else:
-        st.info("No tasks yet for this pet.")
+    status_filter = st.selectbox("Filter by status", ["all", "pending", "completed"])
+    visible_tasks = (
+        selected_pet.tasks
+        if status_filter == "all"
+        else [task for task in selected_pet.tasks if task.status == status_filter]
+    )
+
+    if not visible_tasks:
+        st.info("No tasks match this filter.")
+    for task in visible_tasks:
+        cols = st.columns([3, 1, 1, 1, 2])
+        cols[0].write(task.name)
+        cols[1].write(task.priority)
+        cols[2].write(f"{task.duration_minutes} min")
+        cols[3].write(task.status)
+        if task.status == "pending":
+            if cols[4].button("Mark complete", key=f"complete-{id(task)}"):
+                next_task = selected_pet.complete_task(task)
+                if next_task is not None:
+                    st.success(f"Completed. Next '{next_task.name}' scheduled for {next_task.due_date}.")
+                else:
+                    st.success("Completed.")
+                st.rerun()
 
     st.divider()
 

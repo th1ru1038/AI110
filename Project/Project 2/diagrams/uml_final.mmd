@@ -1,0 +1,66 @@
+classDiagram
+    class Owner {
+        +str name
+        +dict preferences
+        +list~Pet~ pets
+        +add_preference(key, value) None
+        +add_pet(pet) None
+        +all_tasks() list~Task~
+        +filter_tasks(pet_name, status) list~Task~
+    }
+
+    class Pet {
+        +str name
+        +str species
+        +str breed
+        +int age
+        +list~Task~ tasks
+        +add_task(task) None
+        +complete_task(task) Task
+    }
+
+    class Task {
+        +str name
+        +int duration_minutes
+        +str priority
+        +str category
+        +str recurrence
+        +str preferred_time
+        +date due_date
+        +str status
+        +conflicts_with(other) bool
+        +to_dict() dict
+        +mark_complete() None
+        +next_occurrence() Task
+    }
+
+    class Scheduler {
+        +int available_minutes
+        +dict constraints
+        +sort_tasks(tasks) list~Task~
+        +sort_by_time(tasks) list~Task~
+        +filter_tasks(tasks, time_budget) list~Task~
+        +filter_by_status(tasks, status) list~Task~
+        +resolve_conflicts(tasks) list~Task~
+        +detect_conflicts(tasks) list~str~
+        +generate_plan(pet, available_minutes) Schedule
+    }
+
+    class Schedule {
+        +Pet pet
+        +list~tuple~ scheduled_tasks
+        +int total_time_used
+        +list~Task~ skipped_tasks
+        +list~str~ conflict_warnings
+        +add_task(task, time_slot) None
+        +to_display_string() str
+        +explain() str
+    }
+
+    Owner "1" --> "many" Pet : owns
+    Pet "1" --> "many" Task : has
+    Owner "1" --> "many" Task : performs
+    Pet ..> Task : complete_task() creates next occurrence
+    Scheduler ..> Schedule : generate_plan() creates
+    Scheduler --> Task : sorts/filters/detects conflicts
+    Schedule "1" --> "many" Task : contains

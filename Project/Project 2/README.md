@@ -12,6 +12,16 @@ A busy pet owner needs help staying consistent with pet care. They want an assis
 
 Your job is to design the system first (UML), then implement the logic in Python, then connect it to the Streamlit UI.
 
+## ✨ Features
+
+- **Owner + multi-pet tracking** — one owner can manage multiple pets, each with its own task list
+- **Task management** — add tasks with duration, priority, category, recurrence, and an optional preferred time
+- **Smart scheduling** — sorts tasks by priority (and, separately, by time), fits as many as possible into an available-minutes budget, and explains why each task was scheduled or skipped
+- **Conflict warnings** — flags tasks that share the same preferred time instead of silently overwriting one, so the owner can resolve the overlap themselves
+- **Recurring tasks** — marking a daily/weekly task complete automatically creates its next occurrence
+- **Filtering** — view tasks by pet and/or completion status
+- **Persistent session** — the Streamlit UI keeps all owner/pet/task data in `st.session_state` so it survives interaction reruns
+
 ## What you will build
 
 Your final app should:
@@ -127,12 +137,42 @@ tests/test_pawpal.py::test_generate_plan_warns_and_drops_lower_priority_conflict
 
 ## 📸 Demo Walkthrough
 
-Describe your app in numbered steps so a reader can follow along without watching a video:
+1. **Set owner info.** Enter the owner's name and how many minutes are available today. This value drives the scheduler's time budget.
+2. **Add a pet.** Fill in the "Add a Pet" form (name, species, breed, age) and submit — the pet appears immediately and becomes selectable.
+3. **Add tasks to a pet.** Select a pet from the dropdown, then use "Add a Task" to add care tasks with a duration, priority, category, recurrence (daily/weekly/one-off), and an optional preferred time (e.g. `08:00`).
+4. **View and filter tasks.** The task list below the form can be filtered by status (all/pending/completed). Each pending task has a "Mark complete" button.
+5. **Mark a recurring task complete.** Clicking "Mark complete" on a `daily`/`weekly` task automatically creates its next occurrence — you'll see a confirmation naming the new due date, and the new task appears back in the pending list.
+6. **Generate today's schedule.** Click "Generate schedule" to run the `Scheduler` for every pet. Each pet gets its own schedule block: any detected time conflicts show as a warning banner, followed by the ordered plan, followed by an expandable "Why this plan?" explanation.
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
+**Key Scheduler behaviors shown:** priority-based sorting (`sort_tasks`), the time budget cutting off lower-priority tasks once minutes run out (`filter_tasks`), and same-time conflicts being flagged rather than silently dropped (`detect_conflicts`).
+
+Sample CLI output from `python main.py` (same underlying logic as the UI, run outside Streamlit):
+
+```
+=== Tasks sorted by time (Biscuit) ===
+  08:00 — Morning walk
+  08:00 — Meds
+  09:00 — Feeding
+
+=== Today's schedules ===
+Today's Schedule for Biscuit (Golden Retriever):
+  08:00 — Meds (5 min) [priority: high]
+  09:00 — Feeding (10 min) [priority: high]
+  Not scheduled (time ran out or a conflict was detected):
+    - Morning walk (30 min)
+  ⚠ 'Morning walk' and 'Meds' are both scheduled at 08:00.
+
+Today's Schedule for Mochi (Tabby):
+  10:00 — Grooming (20 min) [priority: medium]
+
+=== Recurring task demo ===
+Completed 'Morning walk' (status=completed)
+Next occurrence auto-created: 'Morning walk' due 2026-07-26
+
+=== Filtering demo (pending tasks for Biscuit) ===
+  Feeding (pending)
+  Meds (pending)
+  Morning walk (pending)
+```
 
 **Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->

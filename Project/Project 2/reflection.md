@@ -24,7 +24,7 @@ I split `Scheduler` and `Schedule` into separate classes so the scheduling *logi
 
 I asked my AI assistant to review `pawpal_system.py` against the UML and flag any missing relationships or logic bottlenecks. It found three issues, and I made the following changes:
 
-1. **Added `Owner.all_tasks()`.** The UML said `Owner performs Task`, but the code  no way to actually reach an owner's tasks — you'd have had to mhadanually loop through `owner.pets[i].tasks` yourself. Added a method that aggregates tasks across all of an owner's pets so that relationship is real in code, not just implied on the diagram.
+1. **Added `Owner.all_tasks()`.** The UML said `Owner performs Task`, but the code had no way to actually reach an owner's tasks — you'd have had to manually loop through `owner.pets[i].tasks` yourself. Added a method that aggregates tasks across all of an owner's pets so that relationship is real in code, not just implied on the diagram.
 2. **Removed the redundant `tasks` parameter from `Scheduler.generate_plan`.** It originally took `(pet, tasks, available_minutes)`, but `pet` already carries `pet.tasks`. Passing a separate `tasks` list created a bug risk: the two lists could silently disagree about what the pet's tasks actually are. Now `generate_plan` takes `(pet, available_minutes)` and reads tasks directly from `pet.tasks`.
 3. **Changed `Schedule.scheduled_tasks` from `list[Task]` to `list[tuple[str, Task]]`.** `add_task(task, time_slot)` accepted a `time_slot`, but the original list type had nowhere to store it — once a task was added, its scheduled time would be lost. Storing `(time_slot, task)` pairs keeps that information available for display/explanation later.
 
@@ -48,13 +48,11 @@ The scheduler considers three constraints: task `priority` (high/medium/low), `d
 
 **a. How you used AI**
 
-- How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
-- What kinds of prompts or questions were most helpful?
+I used AI across the whole pipeline: brainstorming the initial class list and responsibilities before any code existed, translating the UML into Python skeletons, implementing scheduling logic incrementally (sorting, filtering, conflict detection, recurrence), writing the test suite, and wiring the Streamlit UI to the logic layer. The most helpful prompts were narrow and concrete rather than open-ended — e.g. "review pawpal_system.py and flag missing relationships or logic bottlenecks" produced specific, actionable findings (three real issues), whereas vague prompts would have produced generic advice. Asking "why" questions about my own design decisions (e.g. why `Pet` holds tasks instead of `Owner`) was also useful for stress-testing the model before locking it into code.
 
 **b. Judgment and verification**
 
-- Describe one moment where you did not accept an AI suggestion as-is.
-- How did you evaluate or verify what the AI suggested?
+One clear moment: I pushed back when the assistant's first design put tasks directly on `Owner` instead of `Pet`. I pointed out that pet care tasks are inherently pet-specific (a walk is for a specific dog, not the owner in the abstract), even though the owner is the one who performs them. Rather than just picking one, we kept both relationships — `Pet has Task` (ownership) and `Owner performs Task` (who acts on it) — which is reflected in `Owner.all_tasks()`. I verified this wasn't just cosmetic by checking that `all_tasks()` actually aggregates through `pet.tasks` rather than duplicating data, and by writing a test (`test_owner_filter_tasks_by_pet_and_status`) that would fail if the aggregation logic were wrong.
 
 ---
 
@@ -62,13 +60,11 @@ The scheduler considers three constraints: task `priority` (high/medium/low), `d
 
 **a. What you tested**
 
-- What behaviors did you test?
-- Why were these tests important?
+The 12-test suite in `tests/test_pawpal.py` covers: object basics (`mark_complete`, `add_task`), sorting correctness (both priority-based and time-based), filtering (time-budget cutoff, and pet/status filtering), conflict detection (both the positive and negative case), recurrence (daily task creates a next occurrence one day later; one-off tasks don't recur), and two edge cases (a pet with zero tasks, and a low-priority task losing a time conflict to a higher-priority one). These mattered because they're exactly the behaviors a busy pet owner would notice if they were wrong — a scheduler that silently drops the wrong task, or "forgets" to warn about a double-booking, would be actively unhelpful rather than just incomplete.
 
 **b. Confidence**
 
-- How confident are you that your scheduler works correctly?
-- What edge cases would you test next if you had more time?
+I'd rate my confidence at 4/5. The core sorting/filtering/conflict/recurrence logic is tested and passing, and I manually verified `app.py` boots and the UI flow works end-to-end. What I'd test next with more time: overlapping-duration conflicts (right now `detect_conflicts` only catches exact `preferred_time` matches — see 2b), scheduling across multiple pets in a single combined run rather than one pet at a time, and weekly-recurrence math specifically (only daily recurrence has a dedicated test for the `timedelta` math).
 
 ---
 
@@ -76,12 +72,12 @@ The scheduler considers three constraints: task `priority` (high/medium/low), `d
 
 **a. What went well**
 
-- What part of this project are you most satisfied with?
+I'm most satisfied with how the UML-first process paid off — because the classes and their responsibilities were settled before any Python was written, implementing the scheduling logic in Phase 4 was mostly filling in behavior for structure that already made sense, rather than discovering mid-implementation that the class boundaries were wrong.
 
 **b. What you would improve**
 
-- If you had another iteration, what would you improve or redesign?
+I'd redesign conflict detection to compare actual time ranges (start + duration) instead of exact `preferred_time` string matches. The current approach is a known, documented tradeoff (see 2b), but it's the biggest gap between what the system claims to do ("detect conflicts") and what it fully does (detect only exact-time collisions).
 
 **c. Key takeaway**
 
-- What is one important thing you learned about designing systems or working with AI on this project?
+The biggest lesson was that being the "lead architect" means making the calls the AI can't make for you — like whether `Task` belongs to `Pet` or `Owner` — and then using AI to pressure-test and implement that decision quickly, rather than asking it to make the decision. The UML review step was the clearest example: the AI found real gaps (a missing relationship, a redundant parameter, a data-loss bug), but only because I gave it a specific artifact and a specific question, not an open-ended "build me a scheduler."
