@@ -48,11 +48,15 @@ class Owner:
     def add_pet(self, pet: Pet) -> None:
         pass
 
+    def all_tasks(self) -> list[Task]:
+        """Aggregate tasks across every pet this owner has (Owner performs Task)."""
+        pass
+
 
 class Schedule:
     def __init__(self, pet: Pet):
         self.pet = pet
-        self.scheduled_tasks: list[Task] = []
+        self.scheduled_tasks: list[tuple[str, Task]] = []
         self.total_time_used: int = 0
         self.skipped_tasks: list[Task] = []
 
@@ -80,5 +84,5 @@ class Scheduler:
     def resolve_conflicts(self, tasks: list[Task]) -> list[Task]:
         pass
 
-    def generate_plan(self, pet: Pet, tasks: list[Task], available_minutes: int) -> Schedule:
+    def generate_plan(self, pet: Pet, available_minutes: int) -> Schedule:
         pass

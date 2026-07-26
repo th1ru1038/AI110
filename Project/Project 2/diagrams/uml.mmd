@@ -2,7 +2,10 @@ classDiagram
     class Owner {
         +str name
         +dict preferences
+        +list~Pet~ pets
         +add_preference(key, value) None
+        +add_pet(pet) None
+        +all_tasks() list~Task~
     }
 
     class Pet {
@@ -31,12 +34,12 @@ classDiagram
         +sort_tasks(tasks) list~Task~
         +filter_tasks(tasks, time_budget) list~Task~
         +resolve_conflicts(tasks) list~Task~
-        +generate_plan(pet, tasks, available_minutes) Schedule
+        +generate_plan(pet, available_minutes) Schedule
     }
 
     class Schedule {
         +Pet pet
-        +list~Task~ scheduled_tasks
+        +list~tuple~ scheduled_tasks
         +int total_time_used
         +list~Task~ skipped_tasks
         +add_task(task, time_slot) None

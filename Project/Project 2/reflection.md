@@ -10,13 +10,25 @@
 
 **a. Initial design**
 
-- Briefly describe your initial UML design.
-- What classes did you include, and what responsibilities did you assign to each?
+My initial UML has five classes, split between simple data holders and behavior-driven classes:
+
+- **Owner** — represents the pet owner. Holds a `name`, a `preferences` dict (things like preferred start time or available time budget), and a list of `Pet`s they own. Responsible for storing owner-level constraints and owning the pets/tasks — tasks are *for* a pet, but *performed by* the owner, so `Owner` also has a direct relationship to `Task`.
+- **Pet** — represents one pet (name, species, breed, age) and holds its own list of `Task`s. Responsible for knowing which tasks belong to it, since one owner can have multiple pets with different care needs.
+- **Task** — one unit of pet care (name, duration, priority, category, recurrence, optional preferred time). Responsible for describing what needs to happen and being comparable/checkable against other tasks (e.g., `conflicts_with`).
+- **Scheduler** — the engine. Takes a pet's tasks and a time budget/constraints, and is responsible for sorting by priority, filtering out tasks that don't fit the time budget, resolving time-slot conflicts, and producing a `Schedule`.
+- **Schedule** — the output of the `Scheduler`: which tasks got scheduled (and when), how much time was used, and which tasks were skipped. Responsible for presenting the plan and explaining the reasoning behind it.
+
+I split `Scheduler` and `Schedule` into separate classes so the scheduling *logic* is testable independently from the *data structure* that holds a finished plan.
 
 **b. Design changes**
 
-- Did your design change during implementation?
-- If yes, describe at least one change and why you made it.
+I asked my AI assistant to review `pawpal_system.py` against the UML and flag any missing relationships or logic bottlenecks. It found three issues, and I made the following changes:
+
+1. **Added `Owner.all_tasks()`.** The UML said `Owner performs Task`, but the code  no way to actually reach an owner's tasks — you'd have had to mhadanually loop through `owner.pets[i].tasks` yourself. Added a method that aggregates tasks across all of an owner's pets so that relationship is real in code, not just implied on the diagram.
+2. **Removed the redundant `tasks` parameter from `Scheduler.generate_plan`.** It originally took `(pet, tasks, available_minutes)`, but `pet` already carries `pet.tasks`. Passing a separate `tasks` list created a bug risk: the two lists could silently disagree about what the pet's tasks actually are. Now `generate_plan` takes `(pet, available_minutes)` and reads tasks directly from `pet.tasks`.
+3. **Changed `Schedule.scheduled_tasks` from `list[Task]` to `list[tuple[str, Task]]`.** `add_task(task, time_slot)` accepted a `time_slot`, but the original list type had nowhere to store it — once a task was added, its scheduled time would be lost. Storing `(time_slot, task)` pairs keeps that information available for display/explanation later.
+
+Updated `diagrams/uml.mmd` to match all three changes so the diagram stays accurate to the implementation.
 
 ---
 
