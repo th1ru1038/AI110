@@ -77,23 +77,43 @@ Next occurrence auto-created: 'Morning walk' due 2026-07-26
 
 ```bash
 # Run the full test suite:
-pytest
+python -m pytest
 
 # Run with coverage:
 pytest --cov
 ```
 
+`tests/test_pawpal.py` covers:
+- **Object basics**: `mark_complete()` changes status, `Pet.add_task()` increases task count
+- **Sorting**: `sort_tasks()` orders by priority then duration; `sort_by_time()` orders chronologically
+- **Filtering**: `filter_tasks()` respects the time budget; `Owner.filter_tasks()` filters by pet + status
+- **Conflict detection**: `detect_conflicts()` flags duplicate preferred times and returns no warnings when there's no overlap
+- **Recurring tasks**: completing a `daily` task creates a next occurrence one day later (via `timedelta`); completing a `one-off` task does not
+- **Edge cases**: a pet with no tasks produces an empty schedule; a low-priority task that conflicts with a higher-priority one at the same time gets dropped and generates exactly one warning
+
 Sample test output:
 
 ```
 ============================= test session starts ==============================
-collected 2 items
+collected 12 items
 
-tests/test_pawpal.py::test_mark_complete_changes_status PASSED           [ 50%]
-tests/test_pawpal.py::test_add_task_increases_pet_task_count PASSED      [100%]
+tests/test_pawpal.py::test_mark_complete_changes_status PASSED           [  8%]
+tests/test_pawpal.py::test_add_task_increases_pet_task_count PASSED      [ 16%]
+tests/test_pawpal.py::test_sort_tasks_orders_by_priority_then_duration PASSED [ 25%]
+tests/test_pawpal.py::test_sort_by_time_returns_chronological_order PASSED [ 33%]
+tests/test_pawpal.py::test_filter_tasks_drops_tasks_once_budget_exceeded PASSED [ 41%]
+tests/test_pawpal.py::test_owner_filter_tasks_by_pet_and_status PASSED   [ 50%]
+tests/test_pawpal.py::test_detect_conflicts_flags_duplicate_preferred_times PASSED [ 58%]
+tests/test_pawpal.py::test_detect_conflicts_returns_empty_list_when_no_conflicts PASSED [ 66%]
+tests/test_pawpal.py::test_complete_daily_task_creates_next_occurrence_one_day_later PASSED [ 75%]
+tests/test_pawpal.py::test_complete_one_off_task_does_not_create_next_occurrence PASSED [ 83%]
+tests/test_pawpal.py::test_generate_plan_for_pet_with_no_tasks_returns_empty_schedule PASSED [ 91%]
+tests/test_pawpal.py::test_generate_plan_warns_and_drops_lower_priority_conflicting_task PASSED [100%]
 
-============================== 2 passed in 0.02s ===============================
+============================== 12 passed in 0.02s ===============================
 ```
+
+**Confidence level:** ⭐⭐⭐⭐☆ (4/5) — core sorting, filtering, conflict-flagging, and recurrence behaviors are covered and passing. Not yet tested: overlapping-duration conflicts (see `reflection.md` 2b), multi-pet schedule generation together in one run, and Streamlit UI interactions (session-state persistence across reruns is exercised manually, not by automated tests).
 
 ## 📐 Smarter Scheduling
 
