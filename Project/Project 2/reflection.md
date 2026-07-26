@@ -36,13 +36,11 @@ Updated `diagrams/uml.mmd` to match all three changes so the diagram stays accur
 
 **a. Constraints and priorities**
 
-- What constraints does your scheduler consider (for example: time, priority, preferences)?
-- How did you decide which constraints mattered most?
+The scheduler considers three constraints: task `priority` (high/medium/low), `duration_minutes` against the owner's `available_minutes` budget, and `preferred_time` (used only to detect same-time conflicts, not full overlap). Priority mattered most because the scenario is about a busy owner who needs the most important care (feeding, meds) to happen even if lower-priority tasks (enrichment, grooming) get dropped — so `sort_tasks` sorts by priority first, then by shorter duration as a tiebreaker so more tasks fit in a tight budget.
 
 **b. Tradeoffs**
 
-- Describe one tradeoff your scheduler makes.
-- Why is that tradeoff reasonable for this scenario?
+`Scheduler.resolve_conflicts` only checks for an *exact* `preferred_time` string match (e.g. two tasks both at `"08:00"`) — it does not check whether task durations actually overlap in time (e.g. an 08:00–08:30 walk and an 08:15 feeding). This is reasonable for this scenario because it keeps the conflict logic simple and fast (`O(n)` with a `set`), and most pet care tasks (meds, feeding) are effectively instantaneous relative to the day, so exact-time collisions are the common case worth catching. The cost is that overlapping-duration conflicts (like the walk/feeding example above) currently go undetected — `detect_conflicts` would need to compare time ranges, not just exact strings, to catch that.
 
 ---
 

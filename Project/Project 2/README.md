@@ -47,12 +47,30 @@ pip install -r requirements.txt
 Output from running `python main.py`, which builds an Owner with two Pets and generates a daily schedule for each:
 
 ```
+=== Tasks sorted by time (Biscuit) ===
+  08:00 — Morning walk
+  08:00 — Meds
+  09:00 — Feeding
+
+=== Today's schedules ===
 Today's Schedule for Biscuit (Golden Retriever):
+  08:00 — Meds (5 min) [priority: high]
   09:00 — Feeding (10 min) [priority: high]
-  08:00 — Morning walk (30 min) [priority: high]
+  Not scheduled (time ran out or a conflict was detected):
+    - Morning walk (30 min)
+  ⚠ 'Morning walk' and 'Meds' are both scheduled at 08:00.
 
 Today's Schedule for Mochi (Tabby):
   10:00 — Grooming (20 min) [priority: medium]
+
+=== Recurring task demo ===
+Completed 'Morning walk' (status=completed)
+Next occurrence auto-created: 'Morning walk' due 2026-07-26
+
+=== Filtering demo (pending tasks for Biscuit) ===
+  Feeding (pending)
+  Meds (pending)
+  Morning walk (pending)
 ```
 
 ## 🧪 Testing PawPal+
@@ -79,14 +97,13 @@ tests/test_pawpal.py::test_add_task_increases_pet_task_count PASSED      [100%]
 
 ## 📐 Smarter Scheduling
 
-> Fill in once you've implemented scheduling logic.
-
 | Feature | Method(s) | Notes |
 |---------|-----------|-------|
-| Task sorting | | e.g., by priority, duration |
-| Filtering | | e.g., skip tasks if time runs out |
-| Conflict handling | | e.g., overlapping time slots |
-| Recurring tasks | | e.g., daily vs. weekly |
+| Task sorting (priority) | `Scheduler.sort_tasks()` | Sorts by priority (high → low), then by shorter duration as a tiebreaker |
+| Task sorting (time) | `Scheduler.sort_by_time()` | Sorts chronologically by `preferred_time` ("HH:MM"); tasks with no time sort last |
+| Filtering | `Scheduler.filter_tasks()`, `Scheduler.filter_by_status()`, `Owner.filter_tasks()` | Drops tasks once the time budget runs out; filters by completion status and/or pet name |
+| Conflict handling | `Scheduler.detect_conflicts()`, `Scheduler.resolve_conflicts()` | Flags tasks sharing an exact `preferred_time` as a warning, and drops the lower-priority one from the generated schedule (does not check overlapping durations — see reflection 2b) |
+| Recurring tasks | `Task.next_occurrence()`, `Pet.complete_task()` | Completing a `daily`/`weekly` task auto-creates its next occurrence using `datetime.timedelta` |
 
 ## 📸 Demo Walkthrough
 

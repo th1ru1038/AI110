@@ -99,6 +99,8 @@ else:
                 continue
             plan = scheduler.generate_plan(pet, available_minutes=int(available_minutes))
             st.markdown(f"**{pet.name}'s schedule**")
+            for warning in plan.conflict_warnings:
+                st.warning(warning)
             st.code(plan.to_display_string())
             with st.expander("Why this plan?"):
                 st.write(plan.explain())
